@@ -7,7 +7,6 @@
     android:padding="24dp"
     tools:context=".MainActivity">
 
-    <!-- Judul Aplikasi -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -17,42 +16,42 @@
         android:textSize="22sp"
         android:textStyle="bold" />
 
-    <!-- Pilihan Tema -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Pilih Tema Jam:"
-        android:textSize="16sp" />
+        android:text="Pilih Tema Jam:" />
 
+    <!-- ID: faceSpinner -->
     <Spinner
-        android:id="@+id/spinnerTheme"
+        android:id="@+id/faceSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp" />
 
-    <!-- Area Pratinjau -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Pratinjau:"
-        android:textSize="16sp" />
-
+    <!-- ID: preview -->
     <ImageView
-        android:id="@+id/ivPreview"
+        android:id="@+id/preview"
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:background="#E0E0E0"
         android:contentDescription="Pratinjau Jam" />
 
-    <!-- Tombol Simpan -->
+    <!-- ID: secondsSwitch -->
+    <Switch
+        android:id="@+id/secondsSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Tampilkan Jarum Detik" />
+
+    <!-- ID: applyButton -->
     <Button
-        android:id="@+id/btnSave"
+        android:id="@+id/applyButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="Simpan Pengaturan" />
+        android:text="Terapkan Pengaturan" />
 
 </LinearLayout>
