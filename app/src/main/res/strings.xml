@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Clock Face Widget</string>
+    <string name="widget_description">Analog clock face widget</string>
+</resources>
