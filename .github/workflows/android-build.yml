@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch: # Memungkinkan build manual dari tab Actions
+  workflow_dispatch: # Memungkinkan kamu menjalankan build secara manual dari tab Actions
 
 jobs:
   build:
@@ -24,7 +24,7 @@ jobs:
       uses: gradle/gradle-build-action@v3
 
     - name: Build Debug APK
-      run: ./gradlew assembleDebug
+      run: gradle assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
