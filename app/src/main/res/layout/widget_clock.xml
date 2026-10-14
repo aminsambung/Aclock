@@ -3,13 +3,13 @@
     android:id="@+id/widgetRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:padding="4dp">
 
     <ImageView
         android:id="@+id/clockImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitCenter"
-        android:contentDescription="Analog clock" />
-
+        android:adjustViewBounds="true"
+        android:contentDescription="Clock Widget" />
 </FrameLayout>
