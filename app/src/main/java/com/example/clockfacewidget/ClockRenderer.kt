@@ -8,32 +8,47 @@ import kotlin.math.sin
 
 object ClockRenderer {
 
+    // Fungsi utama yang dipanggil oleh Widget Provider
     fun render(
         size: Int,
-        face: ClockFace,
+        type: ClockType,
+        analogTheme: AnalogTheme,
+        digitalTheme: DigitalTheme,
         showSeconds: Boolean,
-        digitalStyle: DigitalStyle, // TAMBAHAN PARAMETER
         calendar: Calendar = Calendar.getInstance()
+    ): Bitmap {
+        return if (type == ClockType.ANALOG) {
+            renderAnalog(size, analogTheme, showSeconds, calendar)
+        } else {
+            renderDigital(size, digitalTheme, calendar)
+        }
+    }
+
+    // ==================== JAM ANALOG ====================
+    private fun renderAnalog(
+        size: Int,
+        theme: AnalogTheme,
+        showSeconds: Boolean,
+        calendar: Calendar
     ): Bitmap {
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val cx = size / 2f
         val cy = size / 2f
-        
-        // Radius sedikit diperkecil jika ada jam digital agar tidak bertabrakan
-        val radius = if (digitalStyle == DigitalStyle.NONE) size * 0.40f else size * 0.35f
+        val radius = size * 0.38f // Sedikit lebih kecil agar muat tanggal
 
-        drawBackground(canvas, cx, cy, radius, face)
+        val mainColor = when (theme) {
+            AnalogTheme.BLACK, AnalogTheme.SPACE -> Color.WHITE
+            AnalogTheme.WHITE, AnalogTheme.ROMAN -> Color.BLACK
+        }
+
+        if (theme == AnalogTheme.SPACE) {
+            drawSpaceBackground(canvas)
+        }
 
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.style = Paint.Style.STROKE
         paint.strokeCap = Paint.Cap.ROUND
-
-        val mainColor = when (face) {
-            ClockFace.BLACK, ClockFace.SPACE -> Color.WHITE
-            ClockFace.WHITE, ClockFace.ROMAN -> Color.BLACK
-        }
-
         paint.color = Color.argb(180, mainColor.red(), mainColor.green(), mainColor.blue())
         paint.strokeWidth = size * 0.012f
         canvas.drawCircle(cx, cy, radius, paint)
@@ -42,9 +57,9 @@ object ClockRenderer {
         val minute = calendar.get(Calendar.MINUTE)
         val second = calendar.get(Calendar.SECOND)
 
-        if (face == ClockFace.ROMAN) {
+        if (theme == AnalogTheme.ROMAN) {
             drawRomanNumbers(canvas, cx, cy, radius * 0.82f, mainColor, size)
-        } else if (face != ClockFace.SPACE) {
+        } else if (theme != AnalogTheme.SPACE) {
             drawArabicNumbers(canvas, cx, cy, radius * 0.82f, mainColor, size)
         } else {
             drawMarks(canvas, cx, cy, radius, mainColor, size)
@@ -56,7 +71,6 @@ object ClockRenderer {
 
         drawHand(canvas, cx, cy, radius * 0.52f, hourAngle, mainColor, size * 0.035f)
         drawHand(canvas, cx, cy, radius * 0.73f, minuteAngle, mainColor, size * 0.022f)
-
         if (showSeconds) {
             drawHand(canvas, cx, cy, radius * 0.78f, secondAngle, Color.rgb(230, 70, 70), size * 0.010f)
         }
@@ -65,28 +79,52 @@ object ClockRenderer {
         paint.color = mainColor
         canvas.drawCircle(cx, cy, size * 0.035f, paint)
 
-        // --- TAMBAHAN: Menggambar Jam Digital ---
-        if (digitalStyle != DigitalStyle.NONE) {
-            val digitalPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-            digitalPaint.color = mainColor
-            digitalPaint.textSize = size * 0.12f // Ukuran teks jam digital
-            digitalPaint.textAlign = Paint.Align.CENTER
-            digitalPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+        // Menggambar tanggal di bawah jam analog
+        drawDate(canvas, size, cy + radius * 1.35f, mainColor, calendar)
 
-            val timeText = if (digitalStyle == DigitalStyle.HOUR_24) {
-                String.format(Locale.getDefault(), "%02d:%02d", calendar.get(Calendar.HOUR_OF_DAY), minute)
-            } else {
-                String.format(Locale.getDefault(), "%02d:%02d %s", hour, minute, if (calendar.get(Calendar.AM_PM) == Calendar.AM) "AM" else "PM")
-            }
-            // Posisi teks di bagian atas jam
-            val digitalY = cy - radius * 1.3f
-            canvas.drawText(timeText, cx, digitalY, digitalPaint)
+        return bitmap
+    }
+
+    // ==================== JAM DIGITAL ====================
+    private fun renderDigital(
+        size: Int,
+        theme: DigitalTheme,
+        calendar: Calendar
+    ): Bitmap {
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+
+        val mainColor = when (theme) {
+            DigitalTheme.BIG_WHITE -> Color.WHITE
+            DigitalTheme.BIG_BLACK -> Color.BLACK
         }
-        // --- AKHIR TAMBAHAN ---
 
-        // --- Menggambar Hari dan Tanggal ---
+        val timePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        timePaint.color = mainColor
+        timePaint.textAlign = Paint.Align.CENTER
+        timePaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+        val timeText = String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
+
+        timePaint.textSize = size * 0.32f
+        val textBounds = Rect()
+        timePaint.getTextBounds(timeText, 0, timeText.length, textBounds)
+        val textY = (size / 2f) - (textBounds.exactCenterY())
+        
+        canvas.drawText(timeText, size / 2f, textY, timePaint)
+
+        // Menggambar tanggal di bawah jam digital
+        drawDate(canvas, size, size / 2f + textBounds.height() * 1.5f, mainColor, calendar)
+
+        return bitmap
+    }
+
+    // ==================== FUNGSI BANTU ====================
+    private fun drawDate(canvas: Canvas, size: Int, y: Float, color: Int, calendar: Calendar) {
         val datePaint = Paint(Paint.ANTI_ALIAS_FLAG)
-        datePaint.color = mainColor
+        datePaint.color = color
         datePaint.textSize = size * 0.075f
         datePaint.textAlign = Paint.Align.CENTER
         datePaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
@@ -94,26 +132,21 @@ object ClockRenderer {
         val dayOfWeek = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale("id", "ID"))
         val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         val month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale("id", "ID"))
-        
-        val dateText = "${dayOfWeek?.uppercase()}, $dayOfMonth ${month?.uppercase()}"
-        val dateY = cy + radius * 1.3f 
-        canvas.drawText(dateText, cx, dateY, datePaint)
-        // --- AKHIR HARI DAN TANGGAL ---
+        val year = calendar.get(Calendar.YEAR)
 
-        return bitmap
+        val dateText = "${dayOfWeek?.uppercase()}, $dayOfMonth ${month?.uppercase()} $year"
+        canvas.drawText(dateText, size / 2f, y, datePaint)
     }
 
-    private fun drawBackground(canvas: Canvas, cx: Float, cy: Float, r: Float, face: ClockFace) {
-        if (face == ClockFace.SPACE) {
-            val p = Paint(Paint.ANTI_ALIAS_FLAG)
-            p.color = Color.WHITE
-            val random = java.util.Random(42)
-            repeat(70) {
-                val x = random.nextFloat() * canvas.width
-                val y = random.nextFloat() * canvas.height
-                val s = 0.7f + random.nextFloat() * 2.0f
-                canvas.drawCircle(x, y, s, p)
-            }
+    private fun drawSpaceBackground(canvas: Canvas) {
+        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+        p.color = Color.WHITE
+        val random = java.util.Random(42)
+        repeat(70) {
+            val x = random.nextFloat() * canvas.width
+            val y = random.nextFloat() * canvas.height
+            val s = 0.7f + random.nextFloat() * 2.0f
+            canvas.drawCircle(x, y, s, p)
         }
     }
 
@@ -126,13 +159,7 @@ object ClockRenderer {
             val a = Math.toRadians(i * 6.0 - 90.0)
             val outer = r * 0.92f
             val inner = if (i % 5 == 0) r * 0.83f else r * 0.87f
-            canvas.drawLine(
-                cx + cos(a).toFloat() * inner,
-                cy + sin(a).toFloat() * inner,
-                cx + cos(a).toFloat() * outer,
-                cy + sin(a).toFloat() * outer,
-                p
-            )
+            canvas.drawLine(cx + cos(a).toFloat() * inner, cy + sin(a).toFloat() * inner, cx + cos(a).toFloat() * outer, cy + sin(a).toFloat() * outer, p)
         }
     }
 
@@ -165,26 +192,13 @@ object ClockRenderer {
         }
     }
 
-    private fun drawHand(
-        canvas: Canvas,
-        cx: Float,
-        cy: Float,
-        length: Float,
-        angle: Float,
-        color: Int,
-        width: Float
-    ) {
+    private fun drawHand(canvas: Canvas, cx: Float, cy: Float, length: Float, angle: Float, color: Int, width: Float) {
         val p = Paint(Paint.ANTI_ALIAS_FLAG)
         p.color = color
         p.strokeWidth = width
         p.strokeCap = Paint.Cap.ROUND
         val a = Math.toRadians(angle.toDouble())
-        canvas.drawLine(
-            cx, cy,
-            cx + cos(a).toFloat() * length,
-            cy + sin(a).toFloat() * length,
-            p
-        )
+        canvas.drawLine(cx, cy, cx + cos(a).toFloat() * length, cy + sin(a).toFloat() * length, p)
     }
 
     private fun Int.red() = Color.red(this)
