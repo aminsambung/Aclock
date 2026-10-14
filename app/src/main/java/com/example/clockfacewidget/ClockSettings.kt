@@ -2,13 +2,11 @@ package com.example.clockfacewidget
 
 import android.content.Context
 
-// Pilihan Tipe Jam
 enum class ClockType(val label: String) {
     ANALOG("Jam Analog"),
     DIGITAL("Jam Digital")
 }
 
-// Pilihan Tema Jam Analog
 enum class AnalogTheme(val label: String) {
     BLACK("Classic Black"),
     WHITE("Classic White"),
@@ -16,10 +14,10 @@ enum class AnalogTheme(val label: String) {
     ROMAN("Roman")
 }
 
-// Pilihan Tema Jam Digital
 enum class DigitalTheme(val label: String) {
     BIG_WHITE("Digital Besar (Putih)"),
-    BIG_BLACK("Digital Besar (Hitam)")
+    BIG_BLACK("Digital Besar (Hitam)"),
+    LCD_RETRO("LCD Retro (Model Baru)") // <-- TAMBAHAN
 }
 
 object ClockSettings {
