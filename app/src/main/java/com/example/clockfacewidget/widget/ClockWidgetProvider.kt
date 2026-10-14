@@ -8,10 +8,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
-import com.example.clockfacewidget.ClockRenderer
-import com.example.clockfacewidget.ClockSettings
-import com.example.clockfacewidget.MainActivity
-import com.example.clockfacewidget.R
+import com.example.clockfacewidget.*
 import java.util.Calendar
 
 class ClockWidgetProvider : AppWidgetProvider() {
@@ -59,17 +56,16 @@ class ClockWidgetProvider : AppWidgetProvider() {
             manager: AppWidgetManager,
             ids: IntArray
         ) {
-            val face = ClockSettings.face(context)
+            val type = ClockSettings.type(context)
+            val analogTheme = ClockSettings.analogTheme(context)
+            val digitalTheme = ClockSettings.digitalTheme(context)
             val seconds = ClockSettings.seconds(context)
-            // TAMBAHAN: Membaca pengaturan gaya jam digital
-            val digitalStyle = ClockSettings.digitalStyle(context)
             val now = Calendar.getInstance()
 
             ids.forEach { id ->
                 val views = RemoteViews(context.packageName, R.layout.widget_clock)
                 val size = 800
-                // TAMBAHAN: Mengirimkan digitalStyle ke ClockRenderer
-                val bitmap = ClockRenderer.render(size, face, seconds, digitalStyle, now)
+                val bitmap = ClockRenderer.render(size, type, analogTheme, digitalTheme, seconds, now)
                 views.setImageViewBitmap(R.id.clockImage, bitmap)
 
                 val launch = PendingIntent.getActivity(
