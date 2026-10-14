@@ -15,7 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="24dp"
             android:text="Pengaturan Clock Face Widget"
             android:textSize="22sp"
             android:textStyle="bold" />
@@ -23,27 +23,41 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pilih Tema Jam:" />
+            android:text="Tipe Jam:" />
 
         <Spinner
-            android:id="@+id/faceSpinner"
+            android:id="@+id/typeSpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp" />
 
-        <!-- TAMBAHAN: Spinner untuk Jam Digital -->
+        <!-- Pilihan Tema Analog -->
         <TextView
+            android:id="@+id/analogLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Pilih Gaya Jam Digital:" />
+            android:text="Tema Jam Analog:" />
+
+        <Spinner
+            android:id="@+id/analogSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
+        <!-- Pilihan Tema Digital -->
+        <TextView
+            android:id="@+id/digitalLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Tema Jam Digital:" />
 
         <Spinner
             android:id="@+id/digitalSpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp" />
-        <!-- AKHIR TAMBAHAN -->
 
         <ImageView
             android:id="@+id/preview"
@@ -54,12 +68,18 @@
             android:background="#E0E0E0"
             android:contentDescription="Pratinjau Jam" />
 
+        <TextView
+            android:id="@+id/secondsLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Tampilkan Jarum Detik:" />
+
         <Switch
             android:id="@+id/secondsSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Tampilkan Jarum Detik" />
+            android:layout_marginTop="4dp" />
 
         <Button
             android:id="@+id/applyButton"
