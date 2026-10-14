@@ -12,6 +12,7 @@ object ClockRenderer {
         size: Int,
         face: ClockFace,
         showSeconds: Boolean,
+        digitalStyle: DigitalStyle, // TAMBAHAN PARAMETER
         calendar: Calendar = Calendar.getInstance()
     ): Bitmap {
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
@@ -19,10 +20,9 @@ object ClockRenderer {
         val cx = size / 2f
         val cy = size / 2f
         
-        // Sedikit diperkecil agar ada ruang untuk teks tanggal di bawah
-        val radius = size * 0.40f 
+        // Radius sedikit diperkecil jika ada jam digital agar tidak bertabrakan
+        val radius = if (digitalStyle == DigitalStyle.NONE) size * 0.40f else size * 0.35f
 
-        // Background sengaja tidak digambar agar transparan
         drawBackground(canvas, cx, cy, radius, face)
 
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -34,7 +34,6 @@ object ClockRenderer {
             ClockFace.WHITE, ClockFace.ROMAN -> Color.BLACK
         }
 
-        // Lingkaran luar jam
         paint.color = Color.argb(180, mainColor.red(), mainColor.green(), mainColor.blue())
         paint.strokeWidth = size * 0.012f
         canvas.drawCircle(cx, cy, radius, paint)
@@ -43,7 +42,6 @@ object ClockRenderer {
         val minute = calendar.get(Calendar.MINUTE)
         val second = calendar.get(Calendar.SECOND)
 
-        // Menggambar angka atau garis penanda jam
         if (face == ClockFace.ROMAN) {
             drawRomanNumbers(canvas, cx, cy, radius * 0.82f, mainColor, size)
         } else if (face != ClockFace.SPACE) {
@@ -52,12 +50,10 @@ object ClockRenderer {
             drawMarks(canvas, cx, cy, radius, mainColor, size)
         }
 
-        // Menghitung sudut jarum jam
         val hourAngle = (hour + minute / 60f) * 30f - 90f
         val minuteAngle = (minute + second / 60f) * 6f - 90f
         val secondAngle = second * 6f - 90f
 
-        // Menggambar jarum jam, menit, dan detik
         drawHand(canvas, cx, cy, radius * 0.52f, hourAngle, mainColor, size * 0.035f)
         drawHand(canvas, cx, cy, radius * 0.73f, minuteAngle, mainColor, size * 0.022f)
 
@@ -65,36 +61,49 @@ object ClockRenderer {
             drawHand(canvas, cx, cy, radius * 0.78f, secondAngle, Color.rgb(230, 70, 70), size * 0.010f)
         }
 
-        // Titik tengah jam
         paint.style = Paint.Style.FILL
         paint.color = mainColor
         canvas.drawCircle(cx, cy, size * 0.035f, paint)
 
-        // --- TAMBAHAN: Menggambar Hari dan Tanggal ---
-        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-        textPaint.color = mainColor
-        textPaint.textSize = size * 0.075f // Ukuran teks
-        textPaint.textAlign = Paint.Align.CENTER
-        textPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+        // --- TAMBAHAN: Menggambar Jam Digital ---
+        if (digitalStyle != DigitalStyle.NONE) {
+            val digitalPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+            digitalPaint.color = mainColor
+            digitalPaint.textSize = size * 0.12f // Ukuran teks jam digital
+            digitalPaint.textAlign = Paint.Align.CENTER
+            digitalPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
 
-        // Format Hari dan Tanggal dalam Bahasa Indonesia
+            val timeText = if (digitalStyle == DigitalStyle.HOUR_24) {
+                String.format(Locale.getDefault(), "%02d:%02d", calendar.get(Calendar.HOUR_OF_DAY), minute)
+            } else {
+                String.format(Locale.getDefault(), "%02d:%02d %s", hour, minute, if (calendar.get(Calendar.AM_PM) == Calendar.AM) "AM" else "PM")
+            }
+            // Posisi teks di bagian atas jam
+            val digitalY = cy - radius * 1.3f
+            canvas.drawText(timeText, cx, digitalY, digitalPaint)
+        }
+        // --- AKHIR TAMBAHAN ---
+
+        // --- Menggambar Hari dan Tanggal ---
+        val datePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        datePaint.color = mainColor
+        datePaint.textSize = size * 0.075f
+        datePaint.textAlign = Paint.Align.CENTER
+        datePaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+
         val dayOfWeek = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale("id", "ID"))
         val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         val month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale("id", "ID"))
         
         val dateText = "${dayOfWeek?.uppercase()}, $dayOfMonth ${month?.uppercase()}"
-
-        // Posisi teks di bawah jam
-        val textY = cy + radius * 1.3f 
-        canvas.drawText(dateText, cx, textY, textPaint)
-        // --- AKHIR TAMBAHAN ---
+        val dateY = cy + radius * 1.3f 
+        canvas.drawText(dateText, cx, dateY, datePaint)
+        // --- AKHIR HARI DAN TANGGAL ---
 
         return bitmap
     }
 
     private fun drawBackground(canvas: Canvas, cx: Float, cy: Float, r: Float, face: ClockFace) {
-        // Background dibiarkan kosong (transparan).
-        // Khusus tema SPACE, kita hanya menggambar bintang-bintangnya saja.
         if (face == ClockFace.SPACE) {
             val p = Paint(Paint.ANTI_ALIAS_FLAG)
             p.color = Color.WHITE
