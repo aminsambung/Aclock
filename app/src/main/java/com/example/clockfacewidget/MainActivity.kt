@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         secondsSwitch = findViewById(R.id.secondsSwitch)
         secondsLabel = findViewById(R.id.secondsLabel)
 
-        // Setup Spinner Tipe Jam
+        // Setup Spinner
         typeSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, ClockType.values().map { it.label })
         analogSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, AnalogTheme.values().map { it.label })
         digitalSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, DigitalTheme.values().map { it.label })
