@@ -8,7 +8,6 @@ import kotlin.math.sin
 
 object ClockRenderer {
 
-    // Fungsi utama yang dipanggil oleh Widget Provider
     fun render(
         size: Int,
         type: ClockType,
@@ -20,11 +19,16 @@ object ClockRenderer {
         return if (type == ClockType.ANALOG) {
             renderAnalog(size, analogTheme, showSeconds, calendar)
         } else {
-            renderDigital(size, digitalTheme, calendar)
+            // Jika tipe digital, cek apakah temanya LCD_RETRO
+            if (digitalTheme == DigitalTheme.LCD_RETRO) {
+                renderLcdRetro(size, calendar)
+            } else {
+                renderDigital(size, digitalTheme, calendar)
+            }
         }
     }
 
-    // ==================== JAM ANALOG ====================
+    // ==================== JAM ANALOG (Sama seperti sebelumnya) ====================
     private fun renderAnalog(
         size: Int,
         theme: AnalogTheme,
@@ -35,7 +39,7 @@ object ClockRenderer {
         val canvas = Canvas(bitmap)
         val cx = size / 2f
         val cy = size / 2f
-        val radius = size * 0.38f // Sedikit lebih kecil agar muat tanggal
+        val radius = size * 0.38f
 
         val mainColor = when (theme) {
             AnalogTheme.BLACK, AnalogTheme.SPACE -> Color.WHITE
@@ -79,24 +83,19 @@ object ClockRenderer {
         paint.color = mainColor
         canvas.drawCircle(cx, cy, size * 0.035f, paint)
 
-        // Menggambar tanggal di bawah jam analog
         drawDate(canvas, size, cy + radius * 1.35f, mainColor, calendar)
-
         return bitmap
     }
 
-    // ==================== JAM DIGITAL ====================
-    private fun renderDigital(
-        size: Int,
-        theme: DigitalTheme,
-        calendar: Calendar
-    ): Bitmap {
+    // ==================== JAM DIGITAL BIASA ====================
+    private fun renderDigital(size: Int, theme: DigitalTheme, calendar: Calendar): Bitmap {
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
         val mainColor = when (theme) {
             DigitalTheme.BIG_WHITE -> Color.WHITE
             DigitalTheme.BIG_BLACK -> Color.BLACK
+            else -> Color.WHITE
         }
 
         val timePaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -114,9 +113,69 @@ object ClockRenderer {
         val textY = (size / 2f) - (textBounds.exactCenterY())
         
         canvas.drawText(timeText, size / 2f, textY, timePaint)
-
-        // Menggambar tanggal di bawah jam digital
         drawDate(canvas, size, size / 2f + textBounds.height() * 1.5f, mainColor, calendar)
+        return bitmap
+    }
+
+    // ==================== JAM LCD RETRO (BARU) ====================
+    private fun renderLcdRetro(size: Int, calendar: Calendar): Bitmap {
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val cx = size / 2f
+        val cy = size / 2f
+
+        // 1. Gambar Frame Luar (Casing Jam) - Warna Gelap
+        val framePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        framePaint.color = Color.rgb(40, 40, 40) // Dark Grey
+        framePaint.style = Paint.Style.FILL
+        canvas.drawCircle(cx, cy, size * 0.48f, framePaint)
+
+        // 2. Gambar Layar LCD - Warna Terang
+        val screenPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        screenPaint.color = Color.rgb(200, 210, 205) // Light Grey/Greenish
+        screenPaint.style = Paint.Style.FILL
+        canvas.drawCircle(cx, cy, size * 0.42f, screenPaint)
+
+        // 3. Gambar Teks Jam Digital (Gaya LCD)
+        val timePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        timePaint.color = Color.rgb(50, 60, 60) // Dark Grey text
+        timePaint.textAlign = Paint.Align.CENTER
+        // Gunakan font Monospace agar terlihat seperti LCD
+        timePaint.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+        val timeText = String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
+
+        timePaint.textSize = size * 0.28f
+        val timeY = cy - size * 0.05f
+        canvas.drawText(timeText, cx, timeY, timePaint)
+
+        // 4. Gambar Garis Pemisah
+        val linePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        linePaint.color = Color.rgb(50, 60, 60)
+        linePaint.strokeWidth = size * 0.005f
+        val lineY = cy + size * 0.10f
+        canvas.drawLine(cx - size * 0.30f, lineY, cx + size * 0.30f, lineY, linePaint)
+
+        // 5. Gambar Hari dan Tanggal (Contoh: MON | JAN)
+        val datePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        datePaint.color = Color.rgb(50, 60, 60)
+        datePaint.textAlign = Paint.Align.CENTER
+        datePaint.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+        datePaint.textSize = size * 0.08f
+
+        val dayOfWeek = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.ENGLISH)
+        val month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.ENGLISH)
+        
+        // Gambar Hari di kiri dan Bulan di kanan
+        val dateY = lineY + size * 0.12f
+        canvas.drawText(dayOfWeek?.uppercase() ?: "", cx - size * 0.15f, dateY, datePaint)
+        
+        // Gambar garis pemisah vertikal kecil
+        canvas.drawLine(cx, lineY + size*0.02f, cx, lineY + size*0.10f, linePaint)
+        
+        canvas.drawText(month?.uppercase() ?: "", cx + size * 0.15f, dateY, datePaint)
 
         return bitmap
     }
