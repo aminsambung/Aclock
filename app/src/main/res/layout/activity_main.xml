@@ -31,7 +31,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp" />
 
-        <!-- Pilihan Tema Analog -->
         <TextView
             android:id="@+id/analogLabel"
             android:layout_width="wrap_content"
@@ -45,7 +44,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp" />
 
-        <!-- Pilihan Tema Digital -->
         <TextView
             android:id="@+id/digitalLabel"
             android:layout_width="wrap_content"
