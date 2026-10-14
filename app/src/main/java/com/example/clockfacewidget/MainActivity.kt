@@ -1,5 +1,6 @@
 package com.example.clockfacewidget
 
+import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.*
@@ -17,10 +18,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var digitalLabel: TextView
     private lateinit var secondsSwitch: Switch
     private lateinit var secondsLabel: TextView
+    
+    // TAMBAHAN UNTUK ALARM
+    private lateinit var alarmSwitch: Switch
+    private lateinit var alarmTimeButton: Button
 
     private var selectedType = ClockType.ANALOG
     private var selectedAnalogTheme = AnalogTheme.BLACK
     private var selectedDigitalTheme = DigitalTheme.BIG_WHITE
+    
+    // TAMBAHAN UNTUK ALARM
+    private var alarmEnabled = false
+    private var alarmHour = 7
+    private var alarmMinute = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +44,10 @@ class MainActivity : AppCompatActivity() {
         digitalLabel = findViewById(R.id.digitalLabel)
         secondsSwitch = findViewById(R.id.secondsSwitch)
         secondsLabel = findViewById(R.id.secondsLabel)
+        
+        // TAMBAHAN UNTUK ALARM
+        alarmSwitch = findViewById(R.id.alarmSwitch)
+        alarmTimeButton = findViewById(R.id.alarmTimeButton)
 
         // Setup Spinner
         typeSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, ClockType.values().map { it.label })
@@ -45,6 +59,12 @@ class MainActivity : AppCompatActivity() {
         selectedAnalogTheme = ClockSettings.analogTheme(this)
         selectedDigitalTheme = ClockSettings.digitalTheme(this)
         secondsSwitch.isChecked = ClockSettings.seconds(this)
+        
+        // TAMBAHAN UNTUK ALARM
+        alarmEnabled = ClockSettings.isAlarmEnabled(this)
+        alarmHour = ClockSettings.alarmHour(this)
+        alarmMinute = ClockSettings.alarmMinute(this)
+        alarmSwitch.isChecked = alarmEnabled
 
         typeSpinner.setSelection(selectedType.ordinal)
         analogSpinner.setSelection(selectedAnalogTheme.ordinal)
@@ -77,9 +97,33 @@ class MainActivity : AppCompatActivity() {
         }
 
         secondsSwitch.setOnCheckedChangeListener { _, _ -> refreshPreview() }
+        
+        // TAMBAHAN UNTUK ALARM: Listener Sakelar
+        alarmSwitch.setOnCheckedChangeListener { _, isChecked ->
+            alarmEnabled = isChecked
+            updateAlarmUi()
+            refreshPreview()
+        }
+        
+        // TAMBAHAN UNTUK ALARM: Tombol Pilih Waktu
+        alarmTimeButton.setOnClickListener {
+            val timePicker = TimePickerDialog(this, { _, h, m ->
+                alarmHour = h
+                alarmMinute = m
+                updateAlarmUi()
+                refreshPreview()
+            }, alarmHour, alarmMinute, true)
+            timePicker.show()
+        }
+        
+        // Inisialisasi tampilan tombol alarm
+        updateAlarmUi()
 
         findViewById<Button>(R.id.applyButton).setOnClickListener {
-            ClockSettings.save(this, selectedType, selectedAnalogTheme, selectedDigitalTheme, secondsSwitch.isChecked)
+            ClockSettings.save(
+                this, selectedType, selectedAnalogTheme, selectedDigitalTheme, 
+                secondsSwitch.isChecked, alarmEnabled, alarmHour, alarmMinute
+            )
             ClockWidgetProvider.updateAll(this)
             Toast.makeText(this, "Pengaturan disimpan.", Toast.LENGTH_SHORT).show()
         }
@@ -98,6 +142,14 @@ class MainActivity : AppCompatActivity() {
         digitalLabel.visibility = if (!isAnalog) View.VISIBLE else View.GONE
         digitalSpinner.visibility = if (!isAnalog) View.VISIBLE else View.GONE
     }
+    
+    // TAMBAHAN: Fungsi untuk memperbarui tampilan tombol alarm
+    private fun updateAlarmUi() {
+        val amPm = if (alarmHour < 12) "AM" else "PM"
+        val displayHour = if (alarmHour == 0) 12 else if (alarmHour > 12) alarmHour - 12 else alarmHour
+        alarmTimeButton.text = String.format("%02d:%02d %s", displayHour, alarmMinute, amPm)
+        alarmTimeButton.isEnabled = alarmEnabled
+    }
 
     private fun refreshPreview() {
         val bitmap = ClockRenderer.render(
@@ -106,6 +158,9 @@ class MainActivity : AppCompatActivity() {
             analogTheme = selectedAnalogTheme,
             digitalTheme = selectedDigitalTheme,
             showSeconds = secondsSwitch.isChecked,
+            alarmEnabled = alarmEnabled,
+            alarmHour = alarmHour,
+            alarmMinute = alarmMinute,
             calendar = Calendar.getInstance()
         )
         preview.setImageBitmap(bitmap)
