@@ -61,12 +61,15 @@ class ClockWidgetProvider : AppWidgetProvider() {
         ) {
             val face = ClockSettings.face(context)
             val seconds = ClockSettings.seconds(context)
+            // TAMBAHAN: Membaca pengaturan gaya jam digital
+            val digitalStyle = ClockSettings.digitalStyle(context)
             val now = Calendar.getInstance()
 
             ids.forEach { id ->
                 val views = RemoteViews(context.packageName, R.layout.widget_clock)
                 val size = 800
-                val bitmap = ClockRenderer.render(size, face, seconds, now)
+                // TAMBAHAN: Mengirimkan digitalStyle ke ClockRenderer
+                val bitmap = ClockRenderer.render(size, face, seconds, digitalStyle, now)
                 views.setImageViewBitmap(R.id.clockImage, bitmap)
 
                 val launch = PendingIntent.getActivity(
