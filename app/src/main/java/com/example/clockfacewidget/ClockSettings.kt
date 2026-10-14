@@ -2,13 +2,11 @@ package com.example.clockfacewidget
 
 import android.content.Context
 
-// Pilihan Tipe Jam
 enum class ClockType(val label: String) {
     ANALOG("Jam Analog"),
     DIGITAL("Jam Digital")
 }
 
-// Pilihan Tema Jam Analog
 enum class AnalogTheme(val label: String) {
     BLACK("Classic Black"),
     WHITE("Classic White"),
@@ -16,7 +14,6 @@ enum class AnalogTheme(val label: String) {
     ROMAN("Roman")
 }
 
-// Pilihan Tema Jam Digital
 enum class DigitalTheme(val label: String) {
     BIG_WHITE("Digital Besar (Putih)"),
     BIG_BLACK("Digital Besar (Hitam)"),
@@ -29,6 +26,10 @@ object ClockSettings {
     private const val KEY_ANALOG_THEME = "analog_theme"
     private const val KEY_DIGITAL_THEME = "digital_theme"
     private const val KEY_SECONDS = "seconds"
+    // TAMBAHAN UNTUK ALARM
+    private const val KEY_ALARM_ENABLED = "alarm_enabled"
+    private const val KEY_ALARM_HOUR = "alarm_hour"
+    private const val KEY_ALARM_MINUTE = "alarm_minute"
 
     fun type(context: Context): ClockType {
         val value = context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
@@ -52,12 +53,28 @@ object ClockSettings {
         context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
             .getBoolean(KEY_SECONDS, false)
 
+    // TAMBAHAN: Fungsi untuk Alarm
+    fun isAlarmEnabled(context: Context): Boolean =
+        context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
+            .getBoolean(KEY_ALARM_ENABLED, false)
+
+    fun alarmHour(context: Context): Int =
+        context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
+            .getInt(KEY_ALARM_HOUR, 7) // Default jam 7
+
+    fun alarmMinute(context: Context): Int =
+        context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
+            .getInt(KEY_ALARM_MINUTE, 0) // Default menit 0
+
     fun save(
         context: Context,
         type: ClockType,
         analogTheme: AnalogTheme,
         digitalTheme: DigitalTheme,
-        seconds: Boolean
+        seconds: Boolean,
+        alarmEnabled: Boolean,
+        alarmHour: Int,
+        alarmMinute: Int
     ) {
         context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
             .edit()
@@ -65,6 +82,9 @@ object ClockSettings {
             .putString(KEY_ANALOG_THEME, analogTheme.name)
             .putString(KEY_DIGITAL_THEME, digitalTheme.name)
             .putBoolean(KEY_SECONDS, seconds)
+            .putBoolean(KEY_ALARM_ENABLED, alarmEnabled)
+            .putInt(KEY_ALARM_HOUR, alarmHour)
+            .putInt(KEY_ALARM_MINUTE, alarmMinute)
             .apply()
     }
 }
