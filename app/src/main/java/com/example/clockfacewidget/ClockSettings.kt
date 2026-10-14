@@ -9,10 +9,18 @@ enum class ClockFace(val label: String) {
     ROMAN("Roman")
 }
 
+// TAMBAHAN: Enum untuk pilihan gaya jam digital
+enum class DigitalStyle(val label: String) {
+    NONE("Tanpa Jam Digital"),
+    HOUR_24("Format 24 Jam"),
+    HOUR_12("Format 12 Jam (AM/PM)")
+}
+
 object ClockSettings {
     private const val PREF = "clock_settings"
     private const val FACE = "face"
     private const val SECONDS = "seconds"
+    private const val DIGITAL_STYLE = "digital_style" // TAMBAHAN
 
     fun face(context: Context): ClockFace {
         val value = context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
@@ -24,11 +32,19 @@ object ClockSettings {
         context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
             .getBoolean(SECONDS, false)
 
-    fun save(context: Context, face: ClockFace, seconds: Boolean) {
+    // TAMBAHAN: Fungsi untuk membaca dan menyimpan gaya jam digital
+    fun digitalStyle(context: Context): DigitalStyle {
+        val value = context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
+            .getString(DIGITAL_STYLE, DigitalStyle.NONE.name) ?: DigitalStyle.NONE.name
+        return runCatching { DigitalStyle.valueOf(value) }.getOrDefault(DigitalStyle.NONE)
+    }
+
+    fun save(context: Context, face: ClockFace, seconds: Boolean, digitalStyle: DigitalStyle) {
         context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
             .edit()
             .putString(FACE, face.name)
             .putBoolean(SECONDS, seconds)
+            .putString(DIGITAL_STYLE, digitalStyle.name) // TAMBAHAN
             .apply()
     }
 }
