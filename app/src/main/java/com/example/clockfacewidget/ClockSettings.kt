@@ -17,7 +17,8 @@ enum class AnalogTheme(val label: String) {
 enum class DigitalTheme(val label: String) {
     BIG_WHITE("Digital Besar (Putih)"),
     BIG_BLACK("Digital Besar (Hitam)"),
-    LCD_RETRO("LCD Retro")
+    LCD_RETRO("LCD Retro"),
+    SPORTY_DIGITAL("Sporty Digital (Baru)") // <-- TAMBAHAN
 }
 
 object ClockSettings {
@@ -26,7 +27,6 @@ object ClockSettings {
     private const val KEY_ANALOG_THEME = "analog_theme"
     private const val KEY_DIGITAL_THEME = "digital_theme"
     private const val KEY_SECONDS = "seconds"
-    // TAMBAHAN UNTUK ALARM
     private const val KEY_ALARM_ENABLED = "alarm_enabled"
     private const val KEY_ALARM_HOUR = "alarm_hour"
     private const val KEY_ALARM_MINUTE = "alarm_minute"
@@ -53,18 +53,17 @@ object ClockSettings {
         context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
             .getBoolean(KEY_SECONDS, false)
 
-    // TAMBAHAN: Fungsi untuk Alarm
     fun isAlarmEnabled(context: Context): Boolean =
         context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
             .getBoolean(KEY_ALARM_ENABLED, false)
 
     fun alarmHour(context: Context): Int =
         context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
-            .getInt(KEY_ALARM_HOUR, 7) // Default jam 7
+            .getInt(KEY_ALARM_HOUR, 7)
 
     fun alarmMinute(context: Context): Int =
         context.getSharedPreferences(PREF, Context.MODE_PRIVATE)
-            .getInt(KEY_ALARM_MINUTE, 0) // Default menit 0
+            .getInt(KEY_ALARM_MINUTE, 0)
 
     fun save(
         context: Context,
