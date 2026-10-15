@@ -1,23 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="24dp">
+package com.example.clockfacewidget
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TES APLIKASI BERHASIL DIBUKA"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 
-    <Button
-        android:id="@+id/applyButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Tombol Tes" />
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-</LinearLayout>
+        val button = findViewById<Button>(R.id.applyButton)
+        button.setOnClickListener {
+            Toast.makeText(this, "Aplikasi Berjalan Normal!", Toast.LENGTH_SHORT).show()
+        }
+    }
+}
