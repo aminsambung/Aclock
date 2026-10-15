@@ -60,12 +60,27 @@ class ClockWidgetProvider : AppWidgetProvider() {
             val analogTheme = ClockSettings.analogTheme(context)
             val digitalTheme = ClockSettings.digitalTheme(context)
             val seconds = ClockSettings.seconds(context)
+            // PERBAIKAN: Baca pengaturan alarm
+            val alarmEnabled = ClockSettings.isAlarmEnabled(context)
+            val alarmHour = ClockSettings.alarmHour(context)
+            val alarmMinute = ClockSettings.alarmMinute(context)
             val now = Calendar.getInstance()
 
             ids.forEach { id ->
                 val views = RemoteViews(context.packageName, R.layout.widget_clock)
                 val size = 800
-                val bitmap = ClockRenderer.render(size, type, analogTheme, digitalTheme, seconds, now)
+                // PERBAIKAN: Kirim parameter alarm ke ClockRenderer
+                val bitmap = ClockRenderer.render(
+                    size = size,
+                    type = type,
+                    analogTheme = analogTheme,
+                    digitalTheme = digitalTheme,
+                    showSeconds = seconds,
+                    alarmEnabled = alarmEnabled,
+                    alarmHour = alarmHour,
+                    alarmMinute = alarmMinute,
+                    calendar = now
+                )
                 views.setImageViewBitmap(R.id.clockImage, bitmap)
 
                 val launch = PendingIntent.getActivity(
