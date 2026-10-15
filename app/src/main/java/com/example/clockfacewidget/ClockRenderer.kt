@@ -14,18 +14,18 @@ object ClockRenderer {
         analogTheme: AnalogTheme,
         digitalTheme: DigitalTheme,
         showSeconds: Boolean,
-        alarmEnabled: Boolean, // TAMBAHAN
-        alarmHour: Int,        // TAMBAHAN
-        alarmMinute: Int,      // TAMBAHAN
+        alarmEnabled: Boolean,
+        alarmHour: Int,
+        alarmMinute: Int,
         calendar: Calendar = Calendar.getInstance()
     ): Bitmap {
         return if (type == ClockType.ANALOG) {
             renderAnalog(size, analogTheme, showSeconds, alarmEnabled, alarmHour, alarmMinute, calendar)
         } else {
-            if (digitalTheme == DigitalTheme.LCD_RETRO) {
-                renderLcdRetro(size, alarmEnabled, alarmHour, alarmMinute, calendar)
-            } else {
-                renderDigital(size, digitalTheme, alarmEnabled, alarmHour, alarmMinute, calendar)
+            when (digitalTheme) {
+                DigitalTheme.LCD_RETRO -> renderLcdRetro(size, alarmEnabled, alarmHour, alarmMinute, calendar)
+                DigitalTheme.SPORTY_DIGITAL -> renderSportyDigital(size, alarmEnabled, alarmHour, alarmMinute, calendar)
+                else -> renderDigital(size, digitalTheme, alarmEnabled, alarmHour, alarmMinute, calendar)
             }
         }
     }
@@ -88,7 +88,6 @@ object ClockRenderer {
         paint.color = mainColor
         canvas.drawCircle(cx, cy, size * 0.030f, paint)
 
-        // Menggambar Alarm jika aktif
         if (alarmEnabled) {
             drawAlarm(canvas, size, cx, cy - radius * 1.4f, mainColor, alarmHour, alarmMinute)
         }
@@ -131,7 +130,6 @@ object ClockRenderer {
         
         canvas.drawText(timeText, size / 2f, textY, timePaint)
 
-        // Menggambar Alarm
         if (alarmEnabled) {
             drawAlarm(canvas, size, size / 2f, textY - textBounds.height(), mainColor, alarmHour, alarmMinute)
         }
@@ -176,7 +174,6 @@ object ClockRenderer {
         val timeY = cy - size * 0.05f
         canvas.drawText(timeText, cx, timeY, timePaint)
 
-        // Menggambar Alarm di LCD Retro
         if (alarmEnabled) {
             drawAlarm(canvas, size, cx, cy - size * 0.22f, Color.rgb(50, 60, 60), alarmHour, alarmMinute)
         }
@@ -191,14 +188,13 @@ object ClockRenderer {
         datePaint.color = Color.rgb(50, 60, 60)
         datePaint.textAlign = Paint.Align.CENTER
         datePaint.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
-        datePaint.textSize = size * 0.07f // Sedikit diperkecil agar muat tanggal lengkap
+        datePaint.textSize = size * 0.07f
 
         val localeID = Locale("id", "ID")
         val dayOfWeek = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, localeID)
         val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         val month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, localeID)
         
-        // Format Tanggal Lengkap: HARI | TANGGAL BULAN
         val dateTextLeft = dayOfWeek?.uppercase() ?: ""
         val dateTextRight = "$dayOfMonth ${month?.uppercase()}"
         
@@ -206,6 +202,89 @@ object ClockRenderer {
         canvas.drawText(dateTextLeft, cx - size * 0.15f, dateY, datePaint)
         canvas.drawLine(cx, lineY + size*0.02f, cx, lineY + size*0.08f, linePaint)
         canvas.drawText(dateTextRight, cx + size * 0.15f, dateY, datePaint)
+
+        return bitmap
+    }
+
+    // ==================== JAM SPORTY DIGITAL (BARU) ====================
+    private fun renderSportyDigital(
+        size: Int,
+        alarmEnabled: Boolean,
+        alarmHour: Int,
+        alarmMinute: Int,
+        calendar: Calendar
+    ): Bitmap {
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val cx = size / 2f
+        val cy = size / 2f
+        val radius = size * 0.46f
+
+        // 1. Background Gelap (Lingkaran Hitam)
+        val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        bgPaint.color = Color.rgb(20, 20, 20)
+        bgPaint.style = Paint.Style.FILL
+        canvas.drawCircle(cx, cy, radius, bgPaint)
+
+        // 2. Bezel Ticks (Garis-garis penanda seperti smartwatch)
+        val tickPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        tickPaint.color = Color.rgb(80, 80, 80)
+        tickPaint.strokeWidth = size * 0.008f
+        tickPaint.strokeCap = Paint.Cap.ROUND
+        for (i in 0 until 60) {
+            val a = Math.toRadians(i * 6.0 - 90.0)
+            val inner = radius * 0.85f
+            val outer = if (i % 5 == 0) radius * 0.95f else radius * 0.90f
+            tickPaint.color = if (i % 5 == 0) Color.WHITE else Color.rgb(80, 80, 80)
+            canvas.drawLine(
+                cx + cos(a).toFloat() * inner, cy + sin(a).toFloat() * inner,
+                cx + cos(a).toFloat() * outer, cy + sin(a).toFloat() * outer,
+                tickPaint
+            )
+        }
+
+        // 3. Teks Jam Digital (Dua Warna)
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+        val hourText = String.format(Locale.getDefault(), "%02d", hour)
+        val minuteText = String.format(Locale.getDefault(), "%02d", minute)
+
+        val timePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        timePaint.textAlign = Paint.Align.CENTER
+        timePaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+        timePaint.textSize = size * 0.22f
+
+        // Gambar Jam (Putih)
+        timePaint.color = Color.WHITE
+        canvas.drawText(hourText, cx, cy - size * 0.02f, timePaint)
+        
+        // Gambar Menit (Cyan/Teal)
+        timePaint.color = Color.rgb(0, 200, 200)
+        canvas.drawText(minuteText, cx, cy + size * 0.15f, timePaint)
+
+        // Gambar Titik Dua (:)
+        timePaint.color = Color.WHITE
+        timePaint.textSize = size * 0.15f
+        canvas.drawText(":", cx, cy + size * 0.05f, timePaint)
+
+        // 4. Hari dan Tanggal di Bawah
+        val datePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        datePaint.color = Color.LTGRAY
+        datePaint.textAlign = Paint.Align.CENTER
+        datePaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+        datePaint.textSize = size * 0.06f
+
+        val localeID = Locale("id", "ID")
+        val dayOfWeek = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, localeID)
+        val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        val month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, localeID)
+        val dateText = "${dayOfWeek?.uppercase()}, $dayOfMonth ${month?.uppercase()}"
+        canvas.drawText(dateText, cx, cy + size * 0.25f, datePaint)
+
+        // 5. Alarm
+        if (alarmEnabled) {
+            drawAlarm(canvas, size, cx, cy - size * 0.25f, Color.rgb(255, 100, 100), alarmHour, alarmMinute)
+        }
 
         return bitmap
     }
@@ -228,7 +307,6 @@ object ClockRenderer {
         canvas.drawText(dateText, size / 2f, y, datePaint)
     }
 
-    // Fungsi baru untuk menggambar ikon alarm dan waktunya
     private fun drawAlarm(canvas: Canvas, size: Int, x: Float, y: Float, color: Int, hour: Int, minute: Int) {
         val alarmPaint = Paint(Paint.ANTI_ALIAS_FLAG)
         alarmPaint.color = color
@@ -236,7 +314,6 @@ object ClockRenderer {
         alarmPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         alarmPaint.textSize = size * 0.06f
         
-        // Format waktu alarm (AM/PM)
         val amPm = if (hour < 12) "AM" else "PM"
         val displayHour = if (hour == 0) 12 else if (hour > 12) hour - 12 else hour
         val alarmText = String.format(Locale.getDefault(), "⏰ %02d:%02d %s", displayHour, minute, amPm)
