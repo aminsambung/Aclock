@@ -79,6 +79,35 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp" />
 
+        <!-- ========== BAGIAN ALARM ========== -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="24dp"
+            android:background="#CCCCCC" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Pengaturan Alarm:"
+            android:textStyle="bold" />
+
+        <Switch
+            android:id="@+id/alarmSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Aktifkan Alarm" />
+
+        <Button
+            android:id="@+id/alarmTimeButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="07:00 AM" />
+        <!-- ========== AKHIR BAGIAN ALARM ========== -->
+
         <Button
             android:id="@+id/applyButton"
             android:layout_width="match_parent"
