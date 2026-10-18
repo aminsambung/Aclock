@@ -110,21 +110,23 @@ object ClockRenderer {
         val dateText = "$dayOfMonth ${month?.capitalize()}"
         canvas.drawText(dateText, textX, size * 0.46f, datePaint)
 
-        // 4. Data Sistem (Baterai, RAM, Data Internet)
+        // 4. Data Sistem (Baterai, RAM, Data Internet) - SUDAH DIPERBAIKI
         val infoPaint = Paint(Paint.ANTI_ALIAS_FLAG)
         infoPaint.color = Color.WHITE
         infoPaint.textAlign = Paint.Align.CENTER
         infoPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
-        infoPaint.textSize = size * 0.05f
+        infoPaint.textSize = size * 0.045f // Ukuran teks sedikit diperkecil
 
         val batteryTemp = getBatteryTemp(context)
         val ramUsed = getRamUsed(context)
         val dataUsed = getDataUsed(context)
 
-        val infoY = size * 0.60f
-        val col1 = size * 0.40f
-        val col2 = size * 0.65f
-        val col3 = size * 0.90f
+        val infoY = size * 0.62f 
+        
+        // Pembagian kolom agar seimbang dan tidak terpotong
+        val col1 = size * 0.35f
+        val col2 = size * 0.60f
+        val col3 = size * 0.85f
 
         canvas.drawText("🌡️ ${batteryTemp}°C", col1, infoY, infoPaint)
         canvas.drawText("🧠 ${ramUsed}", col2, infoY, infoPaint)
