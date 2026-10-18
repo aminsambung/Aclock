@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
             fun refreshPreview() {
                 try {
                     val bitmap = ClockRenderer.render(
+                        context = this, // <-- PERBAIKAN: Menambahkan context
                         size = 700,
                         type = selectedType,
                         analogTheme = selectedAnalogTheme,
@@ -152,7 +153,6 @@ class MainActivity : AppCompatActivity() {
             refreshPreview()
 
         } catch (e: Exception) {
-            // Jika ada error, jangan crash, tapi tampilkan pesan
             Log.e("ClockApp", "FATAL ERROR: ${e.message}", e)
             Toast.makeText(this, "Terjadi kesalahan: ${e.message}", Toast.LENGTH_LONG).show()
         }
