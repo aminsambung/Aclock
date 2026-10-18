@@ -11,14 +11,15 @@ enum class AnalogTheme(val label: String) {
     BLACK("Classic Black"),
     WHITE("Classic White"),
     SPACE("Space"),
-    ROMAN("Roman")
+    ROMAN("Roman"),
+    AESTHETIC_CARD("Aesthetic Card (Merah)") // <-- PASTIKAN INI ADA
 }
 
 enum class DigitalTheme(val label: String) {
     BIG_WHITE("Digital Besar (Putih)"),
     BIG_BLACK("Digital Besar (Hitam)"),
     LCD_RETRO("LCD Retro"),
-    SPORTY_DIGITAL("Sporty Digital (Baru)") // <-- TAMBAHAN
+    SPORTY_DIGITAL("Sporty Digital")
 }
 
 object ClockSettings {
