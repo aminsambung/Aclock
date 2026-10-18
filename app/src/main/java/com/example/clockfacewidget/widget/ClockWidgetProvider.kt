@@ -71,6 +71,7 @@ class ClockWidgetProvider : AppWidgetProvider() {
                 val size = 800
                 // PERBAIKAN: Kirim parameter alarm ke ClockRenderer
                 val bitmap = ClockRenderer.render(
+                    context = context, 
                     size = size,
                     type = type,
                     analogTheme = analogTheme,
